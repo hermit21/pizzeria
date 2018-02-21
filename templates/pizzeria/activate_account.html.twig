@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="panel_form">
+    <div class="title">Activate Account</div>
+    <hr>
+    <div class="panel">
+        <form action="" method="post" id="activate_form">
+            <div class="forms">
+                <input type="text" name="username" id="username" class="form" required />
+                <span class="floatSpan">E-mail:</span>
+            </div>
+            <div class="forms">
+                <input type="text" name="token" id="token" class="form" required />
+                <span class="floatSpan">Activate token:</span>
+            </div>
+            <hr>
+            <div class="btn_panel">
+                <input type="submit" name="active_token" id="active_token" class="btn-success" value="Activate &#x27A4"/>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+    <script src="{{ asset('js/activate_account.js') }}"></script>
+{% endblock %}
+{% block stylesheets %}{% endblock %}

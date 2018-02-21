@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="panel_form">
+    <div class="title">Register Form</div>
+    <hr>
+    <div class="panel">
+        <form action="" method="post" id="register_form">
+            <div class="forms">
+                <input type="text" name="name" id="name" class="form" required/>
+                <span class="floatSpan">Name:</span>
+            </div>
+            <div class="forms">
+                <input type="text" name="surname" id="surname" class="form" required/>
+                <span class="floatSpan">Surname:</span>
+            </div>
+            <div class="forms">
+                <input type="text" name="address" id="address" class="form" required/>
+                <span class="floatSpan">Address:</span>
+            </div>
+            <div class="forms">
+                <input type="text" name="telephon_number" id="telephon_number" class="form" required/>
+                <span class="floatSpan">Telephon Number:</span>
+            </div>
+            <div class="forms">
+                <input type="text" name="username" id="username" class="form" required/>
+                <span class="floatSpan">E-mail:</span>
+            </div>
+            <div class="forms">
+                <input type="password" name="password" id="password" class="form" required/>
+                <span class="floatSpan">Password</span>
+            </div>
+            <div class="forms">
+                <input type="password" name="repeat_password" id="repeat_password" class="form" required/>
+                <span class="floatSpan">Repeat Password:</span>
+            </div>
+            <hr>
+            <div class="btn_panel">
+                <input type="submit" name="register" id="register" class="btn-success" value="Register &#x27A4"/>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+    <script src="{{ asset('js/register.js') }}"></script>
+{% endblock %}
+{% block stylesheets %}{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="panel_form">
+    <div class="title"Login form</div>
+    <hr>
+    <div class="panel">
+        <form action="" method="post" id="myform">
+            <div class="forms">
+                <input type="text" name="username" id="username" class="form" />
+                <span class="floatSpan">E-mail:</span>
+            </div>
+            <div class=""forms>
+                <input type="password" name="password" id="password" class="form"/>
+                <span class="floatSpan">Password:</span>
+            </div>
+            <div class="btn_panel">
+                <input type="submit" name="login" id="login" class="btn-success" value="Log in "/>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block javascripts %}
+    <script src="{{ asset('js/base.js') }}"></script>
+{% endblock %}
+{% block stylesheets %}{% endblock %}

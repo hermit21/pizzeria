@@ -1,3 +1,25 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+pizzeria:
+    path: /pizzeria
+    controller: App\Controller\PizzeriaController::index
+login:
+    path: /pizzeria/login
+    controller: App\Controller\PizzeriaController::login
+register:
+    path: /pizzeria/register
+    controller: App\Controller\PizzeriaController::register
+activate_account:
+    path: /pizzeria/activate_account
+    controller: App\Controller\PizzeriaController::activateAccount
+salaty:
+    path: /pizzeria/salary
+    controller: App\Controller\PizzeriaController::salary
+about:
+    path: /pizzeria/about
+    controller: App\Controller\PizzeriaController::aboutUs
+menu:
+    path: /pizzeria/menu
+    controller: App\Controller\PizzeriaController::menu
+new_pizza:
+    path: /pizzeria/menu/new_pizza
+    controller: App\Controller\PizzeriaController::ownPizza
+
