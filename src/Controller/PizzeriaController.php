@@ -2,9 +2,16 @@
 
 namespace App\Controller;
 
+use App\Classes\EncryptData;
+use App\Classes\Errors;
+use App\Classes\InstanceOrder;
 use App\Classes\InstancesRegistration;
+use App\Classes\Sanitizing;
+use App\Classes\Tokens;
+use App\Classes\Validation;
 use App\Entity\Comments;
 use App\Entity\Components;
+use App\Entity\Orders;
 use App\Entity\PizzaList;
 use App\Entity\Users;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -74,33 +81,48 @@ class PizzeriaController extends Controller
     public function register(Request $request)
     {
         $register_data = new \stdClass();
+        $message_error = array();
 
         if($request->request->get('register'))
         {
-            $hash_obj = new Hash();
-            $salt = $hash_obj->generateToken(20);
-            $activate_token = $hash_obj->generateToken(12);
-            $password_token = $hash_obj->generateToken(12);
 
-            $register_data = $hash_obj->sanetizeParameters($request->request);
-            $register_data->salt = $hash_obj->hashToken($salt);
-            $register_data->activate_token = $hash_obj->hashToken($activate_token);
-            $register_data->password_token = $hash_obj->hashToken($password_token);
-            $register_data->password = $hash_obj->makeHash($register_data->password, $register_data->salt);
+            $sanitize = new Sanitizing();
 
-            $user_obj = new InstancesRegistration();
+            $validate = new Validation($sanitize);
 
+            if($validate->validElements($register_data)) {
 
-            $user = $user_obj->setRegisterData($register_data);
-            echo '<script type="text/javascript">alert("' . $activate_token . '")</script>';
-            $em = $this->getDoctrine()->getManager();
+                $tokens = new Tokens();
 
-            $em->persist($user);
-            $em->flush();
+                $activate_token = $tokens->generateToken(12);
+                $password_token = $tokens->generateToken(12);
+                $salt = $tokens->generateToken(20);
 
+                $register_data->activate_token = $tokens->hashToken($activate_token);
+                $register_data->password_token = $tokens->hashToken($password_token);
+                $register_data->password = $tokens->makeHash($register_data->password, $register_data->salt);
+
+                $user = new Users();
+
+                $instanceRegistration = new InstancesRegistration($user);
+
+                $user = $instanceRegistration->setRegisterData($register_data);
+
+                $em = $this->getDoctrine()->getManager();
+                echo '<script type="text/javascript">alert("' . $activate_token . '")</script>';
+                $em->persist($user);
+                $em->flush();
+
+            }
+            else {
+              $message_error = $validate->displayError();
+            }
 
         }
-        return $this->render('pizzeria/register.html.twig', array('user_data' => $register_data));
+        return $this->render('pizzeria/register.html.twig', array(
+            'user_data' => $register_data,
+            'errors' => $message_error
+        ));
     }
 
     /**
@@ -108,37 +130,45 @@ class PizzeriaController extends Controller
      */
     public function activateAccount(Request $request)
     {
-        $hash_obj = new Hash();
+        $sanitizing = new Sanitizing();
+        $validation = new Validation($sanitizing);
 
+        $error_message = array();
 
         if($request->request->get('active_token'))
         {
             $em = $this->getDoctrine();
             $user = new Users();
+            $token = new Tokens();
 
             // Data from the form (username, token)
-            $http_data = $hash_obj->sanetizeParameters($request->request);
-            $user = $em->getRepository(Users::class)->findOneBy([
-                'username' => $http_data->username,
-                'activate_token' => $hash_obj->hashToken($http_data->token)
-            ]);
+            if($validation->validElements($request->request)) {
+                $user = $em->getRepository(Users::class)->findOneBy([
+                    'username' => $http_data->username,
+                    'activate_token' => $token->hashToken($http_data->token)
+                ]);
 
-            if(empty($user))
-            {
-                //error token nie istnieje albo user
+                if(!empty($user)) {
+                    //token exist
+                    $em_user = $em->getManager();
+                    $user->setActivateToken('activate');
+
+                    $em_user->flush();
+
+                }
+                else {
+                    $error_message['activate_token'] = "Token or username are incorrect";
+                }
             }
             else {
-                $ative_account = $em->getManager();
-
-
-                $user->setActivateToken("activate");
-                $ative_account->flush();
-
-                return $this->redirectToRoute('login');
+               $error_message = $validation->displayError();
             }
+
         }
 
-        return $this->render('pizzeria/activate_account.html.twig');
+        return $this->render('pizzeria/activate_account.html.twig' , array(
+            'errors' => $error_message
+        ));
     }
 
     /**
@@ -151,7 +181,6 @@ class PizzeriaController extends Controller
         $user = new Users();
         if(!empty($id)) {
            $user = $em->getRepository(Users::class)->find($id);
-
 
         }
 
@@ -183,10 +212,33 @@ class PizzeriaController extends Controller
 
         $pizzaList = $em->getRepository(PizzaList::class)->findAll();
 
+        $sanitizing = new Sanitizing();
+        $validation = new Validation($sanitizing);
+
         if($request->request->get('order')) {
 
-            $hash_obj = new Hash();
-            $order_data = $hash_obj->sanetizeParameters($request->request);
+            $orders = new Orders();
+
+            if($validation->validElements($request->request))
+            {
+                if($request->request->get('accept_order'))
+                {
+                    $instanceOrder = new InstanceOrder($orders);
+
+                    $em = $this->getDoctrine()->getManager();
+
+                    $em->persist($instanceOrder);
+
+                    $em->flush();
+
+                    //adding message to telephone regarding pizza order has been prepared for the implementation
+                }
+
+            }
+            else {
+                //some error will be displayed;
+            }
+
 
         } else if($request->request->get('create_own_pizza')) {
 

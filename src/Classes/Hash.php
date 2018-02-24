@@ -8,40 +8,10 @@
 
 namespace App\Classes;
 
+use App\Classes\Tokens;
 
 class Hash
 {
-    /**
-     * @param $obj_parameters
-     * @return \stdClass
-     */
-    public function sanetizeParameters($obj_parameters)
-    {
-        $result = new \stdClass();
-        foreach ($obj_parameters as $key => $parameter)
-        {
-            $result->$key = htmlspecialchars(trim($parameter), ENT_QUOTES, 'utf-8' );
-        }
-        return $result;
-    }
-
-    /**
-     * @param $size
-     * @return string
-     */
-    public function generateToken($size)
-    {
-        $characters = 'qwertyuiop[]{}1234567890QWERTYUIOPASDF!@#$%^&*()asdfghjkl:_-+=|zxcvbnm<>,.?~GHJKLZXCVBNM';
-        $token = '';
-
-        for($i = 0; $i < $size; $i++) {
-            $rand = rand(0, strlen($characters) - 1);
-            $token.= substr($characters, $rand, 1);
-        }
-
-        return $token;
-
-    }
 
     /**
      * @param $token
@@ -59,17 +29,7 @@ class Hash
      */
     public function makeHash($password, $salt)
     {
-        return hash('sha512', $password.$salt);
-    }
-
-    public function compareValues($password, $salt, $hash_passowd)
-    {
-        if(self::makeHash($password, $salt) == $hash_passowd) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return hash('sha512', $password.self::hashToken($salt));
     }
 
 

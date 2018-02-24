@@ -32,6 +32,7 @@ class InstanceOrder
         $this->order->setDateTimeRequest(date(Y-m-d));
         $this->order->setSize($order_obj->pizza_size);
         $this->order->setTotalPrice($order_obj->total_price);
+        $this->order->setPayment($order_obj->payment);
 
         return $this->order;
     }

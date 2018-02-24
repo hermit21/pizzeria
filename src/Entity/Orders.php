@@ -47,6 +47,11 @@ class Orders
     private $name;
 
     /**
+     * @ORM\Column(type="string", length=15)
+     */
+    private $payment;
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -157,6 +162,24 @@ class Orders
     {
         $this->name = $name;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPayment()
+    {
+        return $this->payment;
+    }
+
+    /**
+     * @param mixed $payment
+     */
+    public function setPayment($payment): void
+    {
+        $this->payment = $payment;
+    }
+
+
 
 
 }

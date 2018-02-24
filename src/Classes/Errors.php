@@ -11,8 +11,15 @@ namespace App\Classes;
 
 class Errors
 {
-    public function putErrors(array $messege)
-    {
+    public $error = array();
 
+    public function putErrors(array $messeges) :void
+    {
+        $this->error = $messeges;
+    }
+
+    public function displayError()
+    {
+        return $this->error;
     }
 }

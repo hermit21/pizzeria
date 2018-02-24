@@ -9,13 +9,13 @@
 namespace App\Classes;
 
 
-class Sanitizing extends Validation
+class Sanitizing
 {
     /**
      * @param $obj_data
      * @return \stdClass
      */
-    public function sanitizingParameters($obj_data)
+    public function sanitizingParameters($obj_data) :object
     {
         $result = new \stdClass();
 

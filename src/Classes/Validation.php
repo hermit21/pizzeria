@@ -9,18 +9,21 @@
 namespace App\Classes;
 
 
-class Validation
+class Validation extends Errors
 {
-    protected $error;
+    protected $sanitizing;
 
-    public function __construct(Errors $error)
+    public function __construct(Sanitizing $sanitizing)
     {
-        $this->error = $error;
+        $this->sanitizing = $sanitizing;
     }
 
-    public function validElements($data)
+    public function validElements($data) :bool
     {
         $error_message = array();
+
+
+        $data = $this->sanitizing->sanitizingParameters($data);
 
         foreach ($data as $key => $values)
         {
@@ -31,18 +34,18 @@ class Validation
                     {
                         if(ctype_alpha($values))
                         {
-                            $error_message[name] = null;
-                            $this->error->putErrors($error_message);
+                            $error_message['name'] = null;
+                            $this->errors->putErrors($error_message);
 
                         }
                         else {
-                            $error_message[name] = "The name is not correct";
-                            $this->error->putErrors($error_message);
+                            $error_message['name'] = "The name is not correct";
+                            $this->putErrors($error_message);
                         }
 
                     } else {
-                        $error_message[name] = "The name must be between 3 and 15 characters";
-                        $this->error->putErrors($error_message);
+                        $error_message['name'] = "The name must be between 3 and 15 characters";
+                        $this->putErrors($error_message);
                     }
                 break;
                 case 'surname':
@@ -51,12 +54,12 @@ class Validation
                 case 'telephon_number':
                     if($values == 9 && ctype_digit($values))
                     {
-                        $error_message[telephon_number] = null;
-                        $this->error->putErrors($error_message);
+                        $error_message['telephon_number'] = null;
+                        $this->putErrors($error_message);
                     }
                     else {
-                        $error_message[telephon_number] = "This number is not correct";
-                        $this->error->putErrors($error_message);
+                        $error_message['telephon_number'] = "This number is not correct";
+                        $this->putErrors($error_message);
                     }
                  break;
                 case 'address':
@@ -65,31 +68,39 @@ class Validation
                 break;
                 case 'password':
                     if($values > 4) {
-                        $error_message[password] = null;
-                        $this->error->putErrors($error_message);
+                        $error_message['password'] = null;
+                        $this->putErrors($error_message);
                     }
                     else {
-                        $error_message[password] = 'Pasword must have minimum 4 characters';
-                        $this->error->putErrors($error_message);
+                        $error_message['password'] = 'Pasword must have minimum 4 characters';
+                        $this->putErrors($error_message);
                     }
                 break;
                 case 'repeat_password':
                     if($values > 4 && $values == $data->password)
                     {
-                        $error_message[repeat_password] = null;
-                        $this->error->putErrors($error_message);
+                        $error_message['repeat_password'] = null;
+                        $this->putErrors($error_message);
                     }
                     else {
-                        $error_message[repeat_password] = "Password's do not match";
-                        $this->error->putErrors($error_message);
+                        $error_message['repeat_password'] = "Password's do not match";
+                        $this->putErrors($error_message);
                     }
                  break;
                 case 'activate_token':
                 break;
-
+                default:
+                break;
             }
 
         }
 
+        if(empty($error_message)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
+
 }
