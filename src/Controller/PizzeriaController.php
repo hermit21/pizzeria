@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Classes\Instances;
+use App\Classes\InstancesRegistration;
 use App\Entity\Comments;
 use App\Entity\Components;
 use App\Entity\PizzaList;
@@ -88,7 +88,7 @@ class PizzeriaController extends Controller
             $register_data->password_token = $hash_obj->hashToken($password_token);
             $register_data->password = $hash_obj->makeHash($register_data->password, $register_data->salt);
 
-            $user_obj = new Instances();
+            $user_obj = new InstancesRegistration();
 
 
             $user = $user_obj->setRegisterData($register_data);
@@ -220,7 +220,7 @@ class PizzeriaController extends Controller
 
             if($request->request->get('accept_order')) {
 
-                $orderInstane = new Instances();
+                $orderInstane = new InstancesRegistration();
                 $orders = $orderInstane->setOrder($data_from_form);
 
                 $em_order->persist($orders);
