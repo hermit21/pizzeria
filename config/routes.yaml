@@ -22,4 +22,7 @@ menu:
 new_pizza:
     path: /pizzeria/menu/new_pizza
     controller: App\Controller\PizzeriaController::ownPizza
+employee:
+    path: /pizzeria/employee
+    controller: App\Controller\EmployeeController::employeePanel
 

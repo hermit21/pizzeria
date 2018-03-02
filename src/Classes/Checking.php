@@ -9,27 +9,23 @@
 namespace App\Classes;
 
 
-class Checking
+class Checking extends Hash
 {
-    public function __construct()
-    {
-
-    }
-
     /**
-     * @param String $exist_value
-     * @param String $expected_value
+     * @param String $pass
+     * @param String $salt
+     * @param String $hash_pass
      * @return bool
      */
-    public function checkValues( String $exist_value, String $expected_value) :string
+    public function checkValues( String $pass, String $salt, String $hash_pass)
     {
-        if($exist_value == $expected_value)
-        {
-            return false;
-        }
-        else {
-            return false;
-        }
+
+       if($hash_pass == $this->makeHash($pass, $salt)) {
+           return true;
+       }
+       else {
+           return false;
+       }
     }
 
 }

@@ -52,6 +52,11 @@ class Orders
     private $payment;
 
     /**
+     * @ORM\Column(type="bool")
+     */
+    private $status;
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -177,6 +182,22 @@ class Orders
     public function setPayment($payment): void
     {
         $this->payment = $payment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param mixed $status
+     */
+    public function setStatus($status): void
+    {
+        $this->status = $status;
     }
 
 

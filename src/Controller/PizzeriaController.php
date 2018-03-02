@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Classes\Checking;
 use App\Classes\EncryptData;
 use App\Classes\Errors;
 use App\Classes\InstanceOrder;
@@ -41,28 +42,31 @@ class PizzeriaController extends Controller
         $session->set('user_id', 3);
 
         if($request->request->get('login')) {
-            $hash_obj = new Hash();
-
+            $sanitize = new Sanitizing();
             $user = new Users();
 
-            $login_user = $hash_obj->sanetizeParameters($request->request);
+            $checking = new Checking();
+
+            $login_user = $sanitize->sanitizingParameters($request->request);
             $em = $this->getDoctrine();
             $user = $em->getRepository(Users::class)->findOneBy([
                 'username' => $login_user->username,
                 'activate_token' => 'activate'
             ]);
 
-            if(!empty($user) && ($hash_obj->compareValues($login_user->password, $user->getSalt(), $user->getPassword())) ) {
+            if(!empty($user) && ($checking->checkValues($login_user->password, $user->getSalt(), $user->getPassword())) ) {
 
                 $session->start();
-                $session->set('user_id', $user->getId());
 
                 if ($user->getPrivilageUser() == 2) {
+                    $session->set('employee_user', $user->getId());
                     return $this->redirectToRoute('employee');
                 }
                 else if($user->getPrivilageUser() == 3) {
+                    $session->set('admin_user', $user->getId());
                     return $this->redirectToRoute('admin');
                 } else {
+                    $session->set('client_user', $user->getId());
                     return $this->redirectToRoute('pizzeria');
                 }
 
@@ -80,48 +84,39 @@ class PizzeriaController extends Controller
      */
     public function register(Request $request)
     {
-        $register_data = new \stdClass();
-        $message_error = array();
+        $register_data = array();
 
         if($request->request->get('register'))
         {
-
             $sanitize = new Sanitizing();
 
-            $validate = new Validation($sanitize);
+            $register_data = $sanitize->sanitizingParameters($request->request);
+            $tokens = new Tokens();
 
-            if($validate->validElements($register_data)) {
+            $activate_token = $tokens->generateToken(12);
+            $password_token = $tokens->generateToken(12);
+            $salt = $tokens->generateToken(20);
 
-                $tokens = new Tokens();
+            $register_data->salt = $tokens->hashToken($salt);
+            $register_data->activate_token = $tokens->hashToken($activate_token);
+            $register_data->password_token = $tokens->hashToken($password_token);
+            $register_data->password = $tokens->makeHash($register_data->password, $register_data->salt);
 
-                $activate_token = $tokens->generateToken(12);
-                $password_token = $tokens->generateToken(12);
-                $salt = $tokens->generateToken(20);
+            $user = new Users();
 
-                $register_data->activate_token = $tokens->hashToken($activate_token);
-                $register_data->password_token = $tokens->hashToken($password_token);
-                $register_data->password = $tokens->makeHash($register_data->password, $register_data->salt);
+            $instanceRegistration = new InstancesRegistration($user);
 
-                $user = new Users();
+            $user = $instanceRegistration->setRegisterData($register_data);
 
-                $instanceRegistration = new InstancesRegistration($user);
+            $em = $this->getDoctrine()->getManager();
+            echo '<script type="text/javascript">alert("' . $activate_token . '")</script>';
+            $em->persist($user);
+            $em->flush();
 
-                $user = $instanceRegistration->setRegisterData($register_data);
-
-                $em = $this->getDoctrine()->getManager();
-                echo '<script type="text/javascript">alert("' . $activate_token . '")</script>';
-                $em->persist($user);
-                $em->flush();
-
-            }
-            else {
-              $message_error = $validate->displayError();
-            }
 
         }
         return $this->render('pizzeria/register.html.twig', array(
             'user_data' => $register_data,
-            'errors' => $message_error
         ));
     }
 
@@ -131,8 +126,6 @@ class PizzeriaController extends Controller
     public function activateAccount(Request $request)
     {
         $sanitizing = new Sanitizing();
-        $validation = new Validation($sanitizing);
-
         $error_message = array();
 
         if($request->request->get('active_token'))
@@ -141,28 +134,26 @@ class PizzeriaController extends Controller
             $user = new Users();
             $token = new Tokens();
 
+            $http_data = $sanitizing->sanitizingParameters($request->request);
+            $em_user = $em->getManager();
             // Data from the form (username, token)
-            if($validation->validElements($request->request)) {
-                $user = $em->getRepository(Users::class)->findOneBy([
-                    'username' => $http_data->username,
-                    'activate_token' => $token->hashToken($http_data->token)
-                ]);
+            $user = $em->getRepository(Users::class)->findOneBy([
+                'username' => $http_data->username,
+                'activate_token' => $token->hashToken($http_data->token)
+            ]);
 
-                if(!empty($user)) {
-                    //token exist
-                    $em_user = $em->getManager();
-                    $user->setActivateToken('activate');
+            if(!empty($user)) {
+                //token exist
 
-                    $em_user->flush();
+                $user->setActivateToken('activate');
+                $em_user->flush();
 
-                }
-                else {
-                    $error_message['activate_token'] = "Token or username are incorrect";
-                }
+                return $this->redirectToRoute('login');
             }
             else {
-               $error_message = $validation->displayError();
+                $error_message['activate_token'] = "Token or username are incorrect";
             }
+
 
         }
 
@@ -183,8 +174,6 @@ class PizzeriaController extends Controller
            $user = $em->getRepository(Users::class)->find($id);
 
         }
-
-
         return $this->render('pizzeria/salary.html.twig', array('user' => $user->getUsername()));
     }
 
@@ -193,7 +182,6 @@ class PizzeriaController extends Controller
      */
     public function aboutUs(SessionInterface $session)
     {
-
         return $this->render('pizzeria/about.html.twig');
     }
 
@@ -205,6 +193,7 @@ class PizzeriaController extends Controller
         $id = $session->get('user_id');
         $em = $this->getDoctrine();
         $user = new Users();
+        $error_message = array();
 
         $user = $em->getRepository(Users::class)->find($id);
 
@@ -236,9 +225,8 @@ class PizzeriaController extends Controller
 
             }
             else {
-                //some error will be displayed;
+                $error_message = $validation->displayError();
             }
-
 
         } else if($request->request->get('create_own_pizza')) {
 
@@ -247,7 +235,8 @@ class PizzeriaController extends Controller
 
         return $this->render('pizzeria/menu.html.twig', array(
             'user' => $user->getUsername(),
-            'pizza_list' => $pizzaList
+            'pizza_list' => $pizzaList,
+            'errors' => $error_message
         ));
     }
 

@@ -11,10 +11,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class EmployeeController extends Controller
 {
+
     /**
      * @Route("/pizzeria/employee", name="employee")
      */
-    public function employeePanel(SessionInterface $session, Reguest $reguest)
+    public function employeePanel(SessionInterface $session, Request $request)
     {
         return $this->render('@Maker/demoPage.html.twig', [ 'path' => str_replace($this->getParameter('kernel.project_dir').'/', '', __FILE__) ]);
     }

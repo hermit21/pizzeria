@@ -138,4 +138,16 @@ input:not(:focus):valid ~ .floatSpan{
     background-position:left bottom;
     color: #fff;
 }
-
+.panel_menu {
+    max-width: 550px;
+    height: auto;
+    margin: 0 auto;
+    border-left: 1px solid #abc;
+    border-right: 1px solid #abc;
+    background-color: #fff;
+}
+.element{
+    width: 90%;
+    height: auto;
+    margin: 0 auto;
+}

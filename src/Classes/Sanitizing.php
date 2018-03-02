@@ -15,13 +15,13 @@ class Sanitizing
      * @param $obj_data
      * @return \stdClass
      */
-    public function sanitizingParameters($obj_data) :object
+    public function sanitizingParameters($obj_data)
     {
         $result = new \stdClass();
 
         foreach ($obj_data as $key => $parameter)
         {
-            $result->$key = htmlspecialchars(trim($parameter), ENT_QUOTES, 'utf-8' );
+            $result->$key = htmlspecialchars($parameter, ENT_QUOTES, 'utf-8' );
         }
         return $result;
     }

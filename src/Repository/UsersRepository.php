@@ -13,6 +13,19 @@ class UsersRepository extends ServiceEntityRepository
         parent::__construct($registry, Users::class);
     }
 
+    /**
+     * @return array
+     */
+
+    public function findUsername() :array
+    {
+        $query = $this->getEntityManager()->createQuery(
+            "select u.username from App\Entity\USERS u"
+        );
+
+        return $query->execute();
+    }
+
     /*
     public function findBySomething($value)
     {
